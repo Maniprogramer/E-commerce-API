@@ -15,9 +15,25 @@ def create_product(product: product_schema.ProductCreate, db: Session = Depends(
     db.refresh(new_product)
     return new_product
 
+from typing import List, Optional
+
 @router.get("/", response_model=List[product_schema.ProductResponse])
-def get_products(db: Session = Depends(get_db)):
-    products = db.query(product_model.Product).all()
+def get_products(
+    db: Session = Depends(get_db),
+    category: Optional[str] = None,
+    search: Optional[str] = None,
+    page: int = 1,
+    limit: int = 10
+):
+    query = db.query(product_model.Product)
+    
+    if category:
+        query = query.filter(product_model.Product.category == category)
+    if search:
+        query = query.filter(product_model.Product.name.ilike(f"%{search}%"))
+        
+    offset = (page - 1) * limit
+    products = query.offset(offset).limit(limit).all()
     return products
 
 @router.get("/{product_id}", response_model=product_schema.ProductResponse)
