@@ -7,6 +7,7 @@ class UserCreate(BaseModel):
 class UserResponse(BaseModel):
     id: int
     email: str
+    is_admin: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 

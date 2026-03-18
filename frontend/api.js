@@ -87,6 +87,13 @@ const api = {
         });
     },
 
+    updateProduct(id, updates) {
+        return this.request(`products/${id}`, {
+            method: 'PUT',
+            body: updates
+        });
+    },
+
     deleteProduct(id) {
         return this.request(`products/${id}`, {
             method: 'DELETE'

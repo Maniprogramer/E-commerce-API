@@ -198,7 +198,11 @@ function updateNavbar() {
     if (state.user) {
         elements.loginBtn.classList.add('hidden');
         elements.userMenu.classList.remove('hidden');
-        elements.addProductBtn.classList.remove('hidden');
+        if (state.user.is_admin) {
+            elements.addProductBtn.classList.remove('hidden');
+        } else {
+            elements.addProductBtn.classList.add('hidden');
+        }
     } else {
         elements.loginBtn.classList.remove('hidden');
         elements.userMenu.classList.add('hidden');
@@ -251,8 +255,17 @@ async function handleAuthSubmit(e) {
             }
         } else {
             await api.signup(email, password);
-            showToast('Account created successfully! Please log in.');
-            toggleAuthMode(); // switch to login
+            showToast('Account created successfully! Logging you in...');
+            
+            // Auto-login
+            const res = await api.login(email, password);
+            if (res && res.access_token) {
+                api.setToken(res.access_token);
+                state.user = await api.getProfile();
+                showToast(`Welcome, ${state.user.email}!`);
+                toggleModal(elements.authModal, false);
+                initApp(); // reload setup
+            }
         }
     } catch (err) {
         elements.authError.innerText = err.message || 'Authentication failed';
@@ -301,7 +314,10 @@ function renderProducts(productsToRender) {
                     <button class="btn-primary" onclick="addToCartEvent(${product.id})">
                         <i class="fa-solid fa-cart-plus"></i> Add
                     </button>
-                    ${state.user ? `
+                    ${state.user && state.user.is_admin ? `
+                    <button class="btn-ghost" title="Edit Price" onclick="editProductPriceEvent(${product.id}, ${product.price})" style="padding: 0.6rem; color: var(--accent); border-color: var(--accent);">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
                     <button class="btn-ghost" title="Delete Product" onclick="deleteProductEvent(${product.id})" style="padding: 0.6rem; color: var(--danger); border-color: var(--danger);">
                         <i class="fa-solid fa-trash"></i>
                     </button>
@@ -338,6 +354,7 @@ async function handleAddProduct(e) {
 }
 
 window.deleteProductEvent = async (id) => {
+    if (!state.user || !state.user.is_admin) return;
     if (!confirm('Are you sure you want to delete this product?')) return;
     
     try {
@@ -346,6 +363,27 @@ window.deleteProductEvent = async (id) => {
         await loadProducts(); // Refresh list
     } catch (err) {
         showToast(`Failed to delete product: ${err.message}`, 'error');
+    }
+};
+
+window.editProductPriceEvent = async (id, currentPrice) => {
+    if (!state.user || !state.user.is_admin) return;
+    
+    const newPriceStr = prompt(`Enter new price for the product:`, currentPrice);
+    if (newPriceStr === null) return; // User cancelled
+    
+    const newPrice = parseFloat(newPriceStr);
+    if (isNaN(newPrice) || newPrice <= 0) {
+        showToast('Invalid price entered', 'error');
+        return;
+    }
+    
+    try {
+        await api.updateProduct(id, { price: newPrice });
+        showToast('Product price updated');
+        await loadProducts(); // Refresh list
+    } catch (err) {
+        showToast(`Failed to update price: ${err.message}`, 'error');
     }
 };
 
