@@ -197,14 +197,10 @@ function toggleAuthMode() {
     
     if (state.isLoginMode) {
         elements.authTitle.innerText = 'Welcome Back';
-        elements.emailGroup.classList.add('hidden');
-        elements.emailGroup.querySelector('input').removeAttribute('required');
         elements.authSubmitBtn.innerText = 'Login';
         elements.authToggleText.innerHTML = 'Don\'t have an account? <a href="#" id="toggleAuthBtn">Sign up</a>';
     } else {
         elements.authTitle.innerText = 'Create Account';
-        elements.emailGroup.classList.remove('hidden');
-        elements.emailGroup.querySelector('input').setAttribute('required', 'true');
         elements.authSubmitBtn.innerText = 'Sign Up';
         elements.authToggleText.innerHTML = 'Already have an account? <a href="#" id="toggleAuthBtn">Login</a>';
     }
@@ -225,21 +221,20 @@ async function handleAuthSubmit(e) {
     elements.authError.innerText = '';
     
     try {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
         const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
         
         if (state.isLoginMode) {
-            const res = await api.login(username, password);
+            const res = await api.login(email, password);
             if (res && res.access_token) {
                 api.setToken(res.access_token);
                 state.user = await api.getProfile();
-                showToast(`Welcome back, ${state.user.username}!`);
+                showToast(`Welcome back, ${state.user.email}!`);
                 toggleModal(elements.authModal, false);
                 initApp(); // reload setup
             }
         } else {
-            await api.signup(email, username, password);
+            await api.signup(email, password);
             showToast('Account created successfully! Please log in.');
             toggleAuthMode(); // switch to login
         }

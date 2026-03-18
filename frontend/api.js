@@ -52,18 +52,18 @@ const api = {
     },
 
     // Auth
-    login(username, password) {
+    login(email, password) {
         return this.request('auth/login', {
             method: 'POST',
             isForm: true,
-            body: { username, password }
+            body: { username: email, password }
         });
     },
 
-    signup(email, username, password) {
+    signup(email, password) {
         return this.request('auth/signup', {
             method: 'POST',
-            body: { email, username, password }
+            body: { email, password }
         });
     },
 
