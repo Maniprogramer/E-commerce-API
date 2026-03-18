@@ -7,8 +7,9 @@ from fastapi.responses import JSONResponse
 from .db.database import Base, engine
 from .models import user, product, cart, order
 from .api import auth, products, cart as cart_api, orders
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from .core.exceptions import AppError
-
 
 def create_app():
     @asynccontextmanager
@@ -21,6 +22,14 @@ def create_app():
         description="A simple scalable E-commerce API",
         version="1.0.0",
         lifespan=lifespan,
+    )
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # Allows all origins
+        allow_credentials=True,
+        allow_methods=["*"],  # Allows all methods
+        allow_headers=["*"],  # Allows all headers
     )
 
     @app.exception_handler(AppError)
@@ -42,9 +51,13 @@ def create_app():
     app.include_router(cart_api.router)
     app.include_router(orders.router)
 
-    @app.get("/")
+    @app.get("/api")
     def read_root():
         return {"message": "Welcome to the E-commerce API"}
+
+    import os
+    if os.path.exists("frontend"):
+        app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 
     return app
 
