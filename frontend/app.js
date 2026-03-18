@@ -141,6 +141,21 @@ function setupEventListeners() {
         });
     });
 
+    // Admin Hint Popup
+    const adminHintBtn = document.getElementById('adminHintBtn');
+    const adminHintPopup = document.getElementById('adminHintPopup');
+    if (adminHintBtn && adminHintPopup) {
+        adminHintBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            adminHintPopup.classList.toggle('hidden');
+        });
+        document.addEventListener('click', (e) => {
+            if (!adminHintPopup.contains(e.target) && e.target !== adminHintBtn) {
+                adminHintPopup.classList.add('hidden');
+            }
+        });
+    }
+
     // Auth
     elements.toggleAuthBtn.addEventListener('click', (e) => {
         e.preventDefault();
