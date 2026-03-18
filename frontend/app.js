@@ -117,7 +117,12 @@ function setupEventListeners() {
     });
 
     // Modals
-    elements.loginBtn.addEventListener('click', () => toggleModal(elements.authModal, true));
+    elements.loginBtn.addEventListener('click', () => {
+        elements.authForm.reset();
+        elements.authError.innerText = '';
+        if (!state.isLoginMode) toggleAuthMode(); // Always start in login mode
+        toggleModal(elements.authModal, true);
+    });
     elements.cartBtn.addEventListener('click', openCart);
     elements.ordersBtn.addEventListener('click', openOrders);
     
