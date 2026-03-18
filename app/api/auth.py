@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from ..db.database import get_db
-from ..models import user as user_model
-from ..schemas import user as user_schema
-from ..utils.hash import hash_password, verify_password
-from ..core.security import create_access_token
-from jose import JWTError, jwt
+
 import os
+from jose import JWTError, jwt
+
+from ..core.security import create_access_token
+from ..db.database import get_db
+from ..schemas import user as user_schema
+from ..services import user_service
+from ..models import user as user_model
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
@@ -28,33 +30,18 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    user = db.query(user_model.User).filter(user_model.User.email == email).first()
+    user = user_service.get_user_by_email(db, email)
     if user is None:
         raise credentials_exception
     return user
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED, response_model=user_schema.UserResponse)
 def signup(user: user_schema.UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(user_model.User).filter(user_model.User.email == user.email).first()
-    if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    
-    hashed_pwd = hash_password(user.password)
-    new_user = user_model.User(email=user.email, hashed_password=hashed_pwd)
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
+    return user_service.create_user(db, user)
 
-@router.post("/login")
+@router.post("/login", response_model=user_schema.TokenResponse)
 def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(user_model.User).filter(user_model.User.email == user_credentials.username).first()
-    if not user:
-        raise HTTPException(status_code=403, detail="Invalid Credentials")
-    
-    if not verify_password(user_credentials.password, user.hashed_password):
-        raise HTTPException(status_code=403, detail="Invalid Credentials")
-        
+    user = user_service.authenticate_user(db, user_credentials.username, user_credentials.password)
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
