@@ -6,7 +6,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")  # Fallback to sqlite for ease of development
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    # Vercel's serverless file system is read-only. We must write SQLite to /tmp/ if running on Vercel without a Postgres URL
+    if os.getenv("VERCEL"):
+        DATABASE_URL = "sqlite:////tmp/sql_app.db"
+    else:
+        DATABASE_URL = "sqlite:///./sql_app.db"
 
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
