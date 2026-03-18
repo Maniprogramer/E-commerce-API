@@ -80,6 +80,19 @@ const api = {
         return this.request(`products/${id}`);
     },
 
+    createProduct(name, price, category) {
+        return this.request('products/', {
+            method: 'POST',
+            body: { name, price: parseFloat(price), category }
+        });
+    },
+
+    deleteProduct(id) {
+        return this.request(`products/${id}`, {
+            method: 'DELETE'
+        });
+    },
+
     // Cart
     getCart() {
         return this.request('cart/');

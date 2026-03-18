@@ -24,11 +24,13 @@ const elements = {
     cartModal: document.getElementById('cartModal'),
     authModal: document.getElementById('authModal'),
     ordersModal: document.getElementById('ordersModal'),
+    addProductModal: document.getElementById('addProductModal'),
     
     // Close Buttons
     closeCartBtn: document.getElementById('closeCartBtn'),
     closeAuthBtn: document.getElementById('closeAuthBtn'),
     closeOrdersBtn: document.getElementById('closeOrdersBtn'),
+    closeAddProductBtn: document.getElementById('closeAddProductBtn'),
     
     // Auth Form
     authForm: document.getElementById('authForm'),
@@ -45,6 +47,11 @@ const elements = {
     cartTotalAmount: document.getElementById('cartTotalAmount'),
     checkoutBtn: document.getElementById('checkoutBtn'),
     ordersList: document.getElementById('ordersList'),
+    
+    // Product Mgmt
+    addProductBtn: document.getElementById('addProductBtn'),
+    addProductForm: document.getElementById('addProductForm'),
+    submitProductBtn: document.getElementById('submitProductBtn'),
     
     // Toasts
     toastContainer: document.getElementById('toastContainer')
@@ -117,9 +124,13 @@ function setupEventListeners() {
     elements.closeAuthBtn.addEventListener('click', () => toggleModal(elements.authModal, false));
     elements.closeCartBtn.addEventListener('click', () => toggleModal(elements.cartModal, false));
     elements.closeOrdersBtn.addEventListener('click', () => toggleModal(elements.ordersModal, false));
+    elements.closeAddProductBtn.addEventListener('click', () => toggleModal(elements.addProductModal, false));
+    elements.addProductBtn.addEventListener('click', () => toggleModal(elements.addProductModal, true));
+    
+    elements.addProductForm.addEventListener('submit', handleAddProduct);
     
     // Close modal on background click
-    [elements.authModal, elements.cartModal, elements.ordersModal].forEach(modal => {
+    [elements.authModal, elements.cartModal, elements.ordersModal, elements.addProductModal].forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) toggleModal(modal, false);
         });
@@ -137,7 +148,10 @@ function setupEventListeners() {
     // Products Search
     elements.searchInput.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase();
-        renderProducts(state.products.filter(p => p.name.toLowerCase().includes(query) || p.description.toLowerCase().includes(query)));
+        renderProducts(state.products.filter(p => 
+            (p.name && p.name.toLowerCase().includes(query)) || 
+            (p.category && p.category.toLowerCase().includes(query))
+        ));
     });
 
     // Cart Checkout
@@ -184,9 +198,11 @@ function updateNavbar() {
     if (state.user) {
         elements.loginBtn.classList.add('hidden');
         elements.userMenu.classList.remove('hidden');
+        elements.addProductBtn.classList.remove('hidden');
     } else {
         elements.loginBtn.classList.remove('hidden');
         elements.userMenu.classList.add('hidden');
+        elements.addProductBtn.classList.add('hidden');
         elements.cartBadge.innerText = '0';
     }
 }
@@ -278,16 +294,60 @@ function renderProducts(productsToRender) {
                 <i class="fa-solid fa-image"></i>
             </div>
             <h3 class="product-title">${product.name}</h3>
-            <p class="product-desc">${product.description || 'No description available'}</p>
+            <p class="product-desc" style="font-size: 0.8rem; color: var(--accent);">${product.category || 'General'}</p>
             <div class="product-footer">
                 <span class="product-price">${formatPrice(product.price)}</span>
-                <button class="btn-primary" onclick="addToCartEvent(${product.id})">
-                    <i class="fa-solid fa-cart-plus"></i> Add
-                </button>
+                <div style="display: flex; gap: 0.5rem">
+                    <button class="btn-primary" onclick="addToCartEvent(${product.id})">
+                        <i class="fa-solid fa-cart-plus"></i> Add
+                    </button>
+                    ${state.user ? `
+                    <button class="btn-ghost" title="Delete Product" onclick="deleteProductEvent(${product.id})" style="padding: 0.6rem; color: var(--danger); border-color: var(--danger);">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                    ` : ''}
+                </div>
             </div>
         </div>
     `).join('');
 }
+
+async function handleAddProduct(e) {
+    e.preventDefault();
+    const btn = elements.submitProductBtn;
+    const initialText = btn.innerText;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+    btn.disabled = true;
+
+    try {
+        const name = document.getElementById('prodName').value;
+        const price = document.getElementById('prodPrice').value;
+        const category = document.getElementById('prodCategory').value;
+
+        await api.createProduct(name, price, category);
+        showToast('Product added successfully!');
+        elements.addProductForm.reset();
+        toggleModal(elements.addProductModal, false);
+        await loadProducts(); // Refresh list
+    } catch (err) {
+        showToast(`Failed to add product: ${err.message}`, 'error');
+    } finally {
+        btn.innerText = initialText;
+        btn.disabled = false;
+    }
+}
+
+window.deleteProductEvent = async (id) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    
+    try {
+        await api.deleteProduct(id);
+        showToast('Product deleted');
+        await loadProducts(); // Refresh list
+    } catch (err) {
+        showToast(`Failed to delete product: ${err.message}`, 'error');
+    }
+};
 
 // Cart Functions
 async function addToCartEvent(productId) {
