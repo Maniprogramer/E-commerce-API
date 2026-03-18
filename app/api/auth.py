@@ -1,0 +1,63 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from sqlalchemy.orm import Session
+from ..db.database import get_db
+from ..models import user as user_model
+from ..schemas import user as user_schema
+from ..utils.hash import hash_password, verify_password
+from ..core.security import create_access_token
+from jose import JWTError, jwt
+import os
+
+router = APIRouter(prefix="/auth", tags=["auth"])
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+
+SECRET_KEY = os.getenv("SECRET_KEY", "supersecretkey")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    user = db.query(user_model.User).filter(user_model.User.email == email).first()
+    if user is None:
+        raise credentials_exception
+    return user
+
+@router.post("/signup", status_code=status.HTTP_201_CREATED, response_model=user_schema.UserResponse)
+def signup(user: user_schema.UserCreate, db: Session = Depends(get_db)):
+    db_user = db.query(user_model.User).filter(user_model.User.email == user.email).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    hashed_pwd = hash_password(user.password)
+    new_user = user_model.User(email=user.email, hashed_password=hashed_pwd)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
+
+@router.post("/login")
+def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = db.query(user_model.User).filter(user_model.User.email == user_credentials.username).first()
+    if not user:
+        raise HTTPException(status_code=403, detail="Invalid Credentials")
+    
+    if not verify_password(user_credentials.password, user.hashed_password):
+        raise HTTPException(status_code=403, detail="Invalid Credentials")
+        
+    access_token = create_access_token(data={"sub": user.email})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@router.get("/profile", response_model=user_schema.UserResponse)
+def get_profile(current_user: user_model.User = Depends(get_current_user)):
+    return current_user
