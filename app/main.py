@@ -14,22 +14,27 @@ from .core.exceptions import AppError
 def create_app():
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        Base.metadata.create_all(bind=engine)
-
-        # Automatically seed a default admin user
-        from .db.database import SessionLocal
-        from .models.user import User
-        from .utils.hash import hash_password
-        
-        db = SessionLocal()
-        admin_email = "admin@ecommerce.com"
+        import traceback
         try:
-            if not db.query(User).filter(User.email == admin_email).first():
-                db.add(User(email=admin_email, hashed_password=hash_password("admin123"), is_admin=True))
-                db.commit()
-        finally:
-            db.close()
+            Base.metadata.create_all(bind=engine)
 
+            # Automatically seed a default admin user
+            from .db.database import SessionLocal
+            from .models.user import User
+            from .utils.hash import hash_password
+            
+            db = SessionLocal()
+            admin_email = "admin@ecommerce.com"
+            try:
+                if not db.query(User).filter(User.email == admin_email).first():
+                    db.add(User(email=admin_email, hashed_password=hash_password("admin123"), is_admin=True))
+                    db.commit()
+            finally:
+                db.close()
+        except Exception as e:
+            print("FASTAPI STARTUP ERROR:", str(e))
+            traceback.print_exc()
+            
         yield
 
     app = FastAPI(
