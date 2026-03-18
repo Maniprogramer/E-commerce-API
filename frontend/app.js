@@ -250,6 +250,7 @@ async function handleAuthSubmit(e) {
                 api.setToken(res.access_token);
                 state.user = await api.getProfile();
                 showToast(`Welcome back, ${state.user.email}!`);
+                elements.authForm.reset();
                 toggleModal(elements.authModal, false);
                 initApp(); // reload setup
             }
@@ -263,6 +264,7 @@ async function handleAuthSubmit(e) {
                 api.setToken(res.access_token);
                 state.user = await api.getProfile();
                 showToast(`Welcome, ${state.user.email}!`);
+                elements.authForm.reset();
                 toggleModal(elements.authModal, false);
                 initApp(); // reload setup
             }
