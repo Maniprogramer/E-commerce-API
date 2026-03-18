@@ -4,10 +4,10 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://postgres:password@db:5432/ecommerce
-      - SECRET_KEY=supersecretkey_from_docker
-      - ALGORITHM=HS256
-      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:password@db:5432/ecommerce}
+      - SECRET_KEY=${SECRET_KEY:-supersecretkey_from_docker}
+      - ALGORITHM=${ALGORITHM:-HS256}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
     depends_on:
       db:
         condition: service_healthy

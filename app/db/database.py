@@ -17,6 +17,10 @@ if not DATABASE_URL:
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
+# Vercel's Serverless OS strictly restricts advanced OpenSSL channel binding parameters used by psycopg2
+if "&channel_binding=require" in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace("&channel_binding=require", "")
+    
 # SQLite fallback needs connect_args={"check_same_thread": False}
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 
