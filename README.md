@@ -2,7 +2,7 @@
 
 A production-style backend system built with FastAPI, simulating real-world e-commerce workflows including authentication, product management, cart handling, and order processing.
 
-🔗 Live API: https://e-commerce-api-three-henna.vercel.app/
+🔗 Live API: https://e-commerce-api-three-henna.vercel.app/    
 📄 Swagger Docs: https://e-commerce-api-three-henna.vercel.app/docs  
 📦 GitHub: https://github.com/Maniprogramer/E-commerce-API/tree/dev
 
