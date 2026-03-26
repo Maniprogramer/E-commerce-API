@@ -2,9 +2,9 @@
 
 A production-style backend system built with FastAPI, simulating real-world e-commerce workflows including authentication, product management, cart handling, and order processing.
 
-🔗 Live API: https://e-commerce-api-three-henna.vercel.app/    
+🔗 Live API: https://e-commerce-api-three-henna.vercel.app/  
 📄 Swagger Docs: https://e-commerce-api-three-henna.vercel.app/docs  
-📦 GitHub: https://github.com/Maniprogramer/E-commerce-API/tree/dev
+📦 GitHub: https://github.com/Maniprogramer/E-commerce-API/tree/dev  
 
 ---
 
@@ -88,3 +88,121 @@ ecommerce-api/
 ├── Dockerfile
 ├── README.md
 └── requirements.txt
+```
+
+---
+
+## ⚙️ Local Setup
+
+```bash
+git clone https://github.com/Maniprogramer/E-commerce-API.git
+cd E-commerce-API
+
+python3 -m venv venv
+source venv/bin/activate
+
+pip install -r requirements.txt
+
+cp .env.example .env
+
+uvicorn app.main:app --reload
+```
+
+👉 Open Swagger UI: http://127.0.0.1:8000/docs
+
+---
+
+## 🔐 Environment Variables
+
+```env
+DATABASE_URL=postgresql://postgres:password@localhost:5432/ecommerce
+SECRET_KEY=change-this-secret-key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+---
+
+## 🐳 Run With Docker
+
+```bash
+docker compose up --build
+```
+
+Services:
+- FastAPI app → port 8000  
+- PostgreSQL → port 5432  
+
+---
+
+## 🧪 Run Tests
+
+```bash
+pytest
+```
+
+- Uses SQLite for lightweight testing
+- No need for PostgreSQL during tests
+
+---
+
+## 📡 Main API Endpoints
+
+### Auth
+- `POST /auth/signup`
+- `POST /auth/login`
+- `GET /auth/profile`
+
+### Products
+- `POST /products/`
+- `GET /products/`
+- `GET /products/{product_id}`
+- `PUT /products/{product_id}`
+- `DELETE /products/{product_id}`
+
+Query examples:
+- `/products/?category=electronics`
+- `/products/?search=iphone`
+- `/products/?page=1&limit=10`
+
+### Cart
+- `POST /cart/`
+- `GET /cart/`
+- `DELETE /cart/{cart_id}`
+
+### Orders
+- `POST /orders/`
+- `GET /orders/`
+- `POST /orders/pay`
+
+---
+
+## 🚀 Deployment Notes
+
+This project is ready for deployment on platforms like Render, Railway, or Vercel.
+
+Steps:
+1. Create a PostgreSQL database
+2. Set environment variables from `.env.example`
+3. Run:
+
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+---
+
+## 📌 Future Improvements
+
+- Add payment gateway integration (Stripe/Razorpay)
+- Implement caching (Redis)
+- Add role-based access control (RBAC)
+- Improve test coverage
+- Add rate limiting and logging
+
+---
+
+## 👨‍💻 Author
+
+**Manikanta Yarramneedi**  
+Backend Developer | Python | FastAPI | PostgreSQL  
