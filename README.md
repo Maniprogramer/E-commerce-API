@@ -1,141 +1,84 @@
-# Scalable E-commerce API
+# 🚀 Scalable E-commerce Backend API
 
-A simple portfolio backend project built with FastAPI. It covers user authentication, products, cart management, orders, mock payments, Docker setup, and basic automated tests.
+A production-style backend system built with FastAPI, simulating real-world e-commerce workflows including authentication, product management, cart handling, and order processing.
 
-## Features
+🔗 Live API: https://e-commerce-fxdryu9ad-maniprogramers-projects.vercel.app/  
+📘 Swagger Docs: https://e-commerce-fxdryu9ad-maniprogramers-projects.vercel.app/docs  
+📦 GitHub: https://github.com/Maniprogramer/E-commerce-API  
 
-- User signup and login with JWT authentication
-- Protected profile route
-- Product CRUD APIs
-- Product filtering, search, and pagination
-- Cart management for logged-in users
-- Order placement and mock payment flow
-- Simple service layer for cleaner business logic
-- Docker and Docker Compose setup
-- Basic pytest test suite
+---
 
-## Tech Stack
+## ⚡ Key Highlights
 
-- FastAPI
-- SQLAlchemy
-- PostgreSQL
-- SQLite for tests
-- Passlib with bcrypt
-- JWT with `python-jose`
-- Pytest
-- Docker
+- Designed a modular and scalable backend architecture using FastAPI  
+- Implemented secure JWT-based authentication and authorization  
+- Built complete e-commerce workflows (Products, Cart, Orders)  
+- Optimized API performance with pagination and filtering  
+- Integrated PostgreSQL using SQLAlchemy ORM  
+- Containerized application using Docker & Docker Compose  
+- Added automated testing using Pytest  
 
-## Project Structure
+---
 
-```text
-ecommerce-api/
-├── app/
-│   ├── api/
-│   ├── core/
-│   ├── db/
-│   ├── models/
-│   ├── schemas/
-│   ├── services/
-│   ├── utils/
-│   └── main.py
-├── tests/
-├── .env.example
-├── docker-compose.yml
-├── Dockerfile
-├── README.md
-└── requirements.txt
-```
+## 🧠 System Design Overview
 
-## Local Setup
+- Layered architecture (API → Services → Database)  
+- Stateless authentication using JWT tokens  
+- Clean separation of concerns via service layer  
+- Scalable schema design for products, users, and orders  
 
-1. Clone the repository.
-2. Create and activate a virtual environment.
-3. Install dependencies.
-4. Copy `.env.example` to `.env` and update the values if needed.
-5. Run the API.
+---
 
-```bash
-git clone https://github.com/Maniprogramer/E-commerce-API.git
-cd E-commerce-API
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-uvicorn app.main:app --reload
-```
+## 🧩 Features
 
-Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) for Swagger UI.
+### 🔐 Authentication
+- User signup and login  
+- JWT-based secure authentication  
+- Protected user profile route  
 
-## Environment Variables
+### 🛍️ Product Management
+- Full CRUD operations  
+- Search, filtering, and pagination  
 
-```env
-DATABASE_URL=postgresql://postgres:password@localhost:5432/ecommerce
-SECRET_KEY=change-this-secret-key
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-```
+### 🛒 Cart System
+- Add and remove items  
+- User-specific cart management  
 
-## Run With Docker
+### 📦 Order System
+- Order placement workflow  
+- Mock payment integration  
 
-```bash
-docker compose up --build
-```
+### ⚙️ Backend Engineering
+- Service layer architecture  
+- Environment-based configuration  
+- Dockerized setup  
+- Automated testing with Pytest  
 
-This starts:
+---
 
-- FastAPI app on port `8000`
-- PostgreSQL on port `5432`
+## 📊 Why This Project Matters
 
-## Run Tests
+This project demonstrates the ability to:
 
-```bash
-pytest
-```
+- Build production-ready backend systems  
+- Design scalable APIs with real-world use cases  
+- Implement authentication and secure data handling  
+- Structure backend code for maintainability and scalability  
+- Deploy and manage applications in a production-like environment  
 
-The tests use SQLite so they can run without PostgreSQL.
+---
 
-## Main API Endpoints
+## 🏗️ Tech Stack
 
-### Auth
+- FastAPI  
+- SQLAlchemy  
+- PostgreSQL  
+- SQLite (for testing)  
+- Passlib (bcrypt hashing)  
+- JWT (python-jose)  
+- Pytest  
+- Docker  
 
-- `POST /auth/signup`
-- `POST /auth/login`
-- `GET /auth/profile`
+---
 
-### Products
-
-- `POST /products/`
-- `GET /products/`
-- `GET /products/{product_id}`
-- `PUT /products/{product_id}`
-- `DELETE /products/{product_id}`
-
-Query examples:
-
-- `/products/?category=electronics`
-- `/products/?search=iphone`
-- `/products/?page=1&limit=10`
-
-### Cart
-
-- `POST /cart/`
-- `GET /cart/`
-- `DELETE /cart/{cart_id}`
-
-### Orders
-
-- `POST /orders/`
-- `GET /orders/`
-- `POST /orders/pay`
-
-## Deployment Notes
-
-This project is ready to deploy on platforms like Render or Railway. The easiest path is to:
-
-1. Create a PostgreSQL database on the platform.
-2. Set the environment variables from `.env.example`.
-3. Start the app with:
-
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
+## 📁 Project Structure
